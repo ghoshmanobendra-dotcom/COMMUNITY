@@ -55,11 +55,18 @@ export const useStorySystem = () => {
             const { data, error } = await supabase
                 .from("stories")
                 .select(`
-          *,
-          profiles:user_id (id, username, full_name, avatar_url),
-          story_views (viewer_id, created_at, profiles:viewer_id (username, avatar_url)),
-          story_likes (user_id, created_at, profiles:user_id (username, avatar_url))
-        `)
+                    id,
+                    user_id,
+                    media_url,
+                    media_type,
+                    caption,
+                    visibility,
+                    created_at,
+                    expires_at,
+                    profiles:user_id (id, username, full_name, avatar_url),
+                    story_views (viewer_id, viewed_at, profiles:viewer_id (username, avatar_url)),
+                    story_likes (user_id, created_at, profiles:user_id (username, avatar_url))
+                `)
                 .gt("expires_at", new Date().toISOString())
                 .order("created_at", { ascending: true });
 
@@ -187,10 +194,10 @@ export const useStorySystem = () => {
                     user_id: currentUserId,
                     media_url: publicUrl,
                     media_type: file.type.startsWith('video') ? 'video' : 'image',
-                    caption: files.length === 1 ? caption : '', // Only apply caption to first if single, or all? user didn't specify. empty for bulk might be safer or apply to all.
+                    caption: files.length === 1 ? caption : '',
                     visibility,
                     expires_at: expiresAt
-                });
+                }).select().single();
             });
 
             await Promise.all(uploadPromises);
