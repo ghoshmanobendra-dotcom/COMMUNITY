@@ -92,9 +92,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     if (showTerms && userId) {
         return (
             <>
-                <div className="fixed inset-0 z-[-1]">
+                {/* <div className="fixed inset-0 z-[-1]">
                     <Background3D />
-                </div>
+                </div> */}
                 <TermsModal
                     isOpen={showTerms}
                     userId={userId}
@@ -109,9 +109,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <>
-            <div className="fixed inset-0 z-[-1]">
+            {/* <div className="fixed inset-0 z-[-1]">
                 <Background3D />
-            </div>
+            </div> */}
             {children}
         </>
     );
