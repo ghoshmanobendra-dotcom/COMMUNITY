@@ -1,6 +1,6 @@
 
 import React, { useRef, useState } from "react";
-import { motion, HTMLMotionProps } from "framer-motion";
+import { motion, HTMLMotionProps, useMotionValue, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface TiltCardProps extends HTMLMotionProps<"div"> {
@@ -10,14 +10,14 @@ interface TiltCardProps extends HTMLMotionProps<"div"> {
 }
 
 const TiltCard = ({ children, className, intensity = 15, ...props }: TiltCardProps) => {
-    const ref = useRef<HTMLDivElement>(null);
-    const [rotateX, setRotateX] = useState(0);
-    const [rotateY, setRotateY] = useState(0);
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+
+    const rotateX = useTransform(y, [-0.5, 0.5], [intensity, -intensity]);
+    const rotateY = useTransform(x, [-0.5, 0.5], [-intensity, intensity]);
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!ref.current) return;
-
-        const rect = ref.current.getBoundingClientRect();
+        const rect = e.currentTarget.getBoundingClientRect();
         const width = rect.width;
         const height = rect.height;
         const mouseX = e.clientX - rect.left;
@@ -26,31 +26,23 @@ const TiltCard = ({ children, className, intensity = 15, ...props }: TiltCardPro
         const xPct = mouseX / width - 0.5;
         const yPct = mouseY / height - 0.5;
 
-        setRotateX(yPct * -intensity);
-        setRotateY(xPct * intensity);
+        x.set(xPct);
+        y.set(yPct);
     };
 
     const handleMouseLeave = () => {
-        setRotateX(0);
-        setRotateY(0);
+        x.set(0);
+        y.set(0);
     };
 
     return (
         <motion.div
-            ref={ref}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={{
                 transformStyle: "preserve-3d",
-            }}
-            animate={{
                 rotateX,
                 rotateY,
-            }}
-            transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 30,
             }}
             className={cn("relative transition-all duration-200 ease-out", className)}
             {...props}

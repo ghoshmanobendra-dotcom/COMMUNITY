@@ -17,9 +17,9 @@ const Background3D = () => {
 
         // Theme Colors
         const colors = ["#1D9BF0", "#ffffff", "#8ECDF8"]; // Primary Blue, White, Secondary Blue
-        // Reduced particle count slightly for cleaner look
-        const particleCount = Math.min(Math.floor((width * height) / 12000), 120);
-        const connectionDistance = 150;
+        // Reduced particle count slightly for cleaner look and performance
+        const particleCount = Math.min(Math.floor((width * height) / 25000), 70);
+        const connectionDistance = 140;
         const mouseParams = { x: -1000, y: -1000, radius: 150 }; // Init off-screen
 
         class Particle {
