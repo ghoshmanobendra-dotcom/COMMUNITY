@@ -16,7 +16,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
         const checkAuth = async () => {
             try {
-                const { data: { session } } = await supabase.auth.getSession();
+                // improved check with timeout
+                const sessionPromise = supabase.auth.getSession();
+                const timeoutPromise = new Promise<{ data: { session: null } }>((resolve) =>
+                    setTimeout(() => resolve({ data: { session: null } }), 5000)
+                );
+
+                const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
 
                 if (mounted) {
                     setIsAuthenticated(!!session);
@@ -32,6 +38,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
                         if (profile && profile.terms_accepted === false) {
                             setShowTerms(true);
                         }
+                    } else {
+                        // Session is null (or timed out), so not authenticated
+                        console.log("No session found or timeout");
                     }
                 }
             } catch (error) {
@@ -68,9 +77,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     if (isAuthenticated === null) {
-        return <div className="min-h-screen flex items-center justify-center bg-black">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>;
+        return (
+            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-zinc-900 text-white">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+                <p>Checking Authentication...</p>
+            </div>
+        );
     }
 
     if (!isAuthenticated) {
