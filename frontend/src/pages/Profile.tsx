@@ -91,16 +91,9 @@ const Profile = () => {
 
   const [mutuals, setMutuals] = useState<any[]>([]);
   const [loadingMutuals, setLoadingMutuals] = useState(false);
-  const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
-  // Story state
-  const [hasStory, setHasStory] = useState(false);
 
   const handleAvatarClick = () => {
-    if (hasStory) {
-      setIsAvatarDialogOpen(true);
-    } else {
-      if (profile.avatar_url) window.open(profile.avatar_url, '_blank');
-    }
+    if (profile.avatar_url) window.open(profile.avatar_url, '_blank');
   };
 
   // Edit State
@@ -269,15 +262,7 @@ const Profile = () => {
                 }
               }
 
-              // Check for active stories (valid for 24h)
-              const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-              const { count: storyCount } = await supabase
-                .from('stories')
-                .select('id', { count: 'exact', head: true }) // count instead of SELECT *
-                .eq('user_id', profileData.id)
-                .gt('created_at', twentyFourHoursAgo);
 
-              setHasStory(!!storyCount && storyCount > 0);
             }
           }
         }
@@ -583,7 +568,7 @@ const Profile = () => {
       <div className="px-4 -mt-16 relative z-10">
         <div className="flex items-end gap-4">
           <div onClick={handleAvatarClick} className="cursor-pointer relative">
-            <div className={`rounded-full p-[3px] ${hasStory ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500' : 'bg-transparent'}`}>
+            <div className={`rounded-full p-[3px] bg-transparent`}>
               <Avatar className="h-24 w-24 border-4 border-background bg-background">
                 <AvatarImage src={profile.avatar_url} alt={profile.full_name} className="object-cover" />
                 <AvatarFallback className="text-2xl bg-muted text-foreground">{(profile.full_name || "U")[0]}</AvatarFallback>
@@ -591,29 +576,7 @@ const Profile = () => {
             </div>
           </div>
 
-          <Dialog open={isAvatarDialogOpen} onOpenChange={setIsAvatarDialogOpen}>
-            <DialogContent className="sm:max-w-sm bg-card border-border">
-              <DialogHeader>
-                <DialogTitle className="text-center">{profile.username}</DialogTitle>
-              </DialogHeader>
-              <div className="flex flex-col gap-2 pt-2">
-                <Button
-                  className="w-full justify-start font-semibold text-lg py-6" variant="ghost"
-                  onClick={() => {
-                    // Navigate to home with state to open story
-                    navigate('/', { state: { openStoryForUser: profile.username } });
-                  }}
-                >
-                  <span className="bg-clip-text text-transparent bg-gradient-to-tr from-yellow-500 to-purple-500">
-                    View Story
-                  </span>
-                </Button>
-                <Button className="w-full justify-start font-medium py-6" variant="ghost" onClick={() => window.open(profile.avatar_url, '_blank')}>
-                  See Profile Photo
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+
 
           {isOwnProfile ? (
             <Button size="sm" variant="outline" className="mb-2 gap-2 border-border hover:bg-muted text-foreground" onClick={() => {
